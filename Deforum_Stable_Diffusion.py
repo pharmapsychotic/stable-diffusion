@@ -623,6 +623,8 @@ def load_model_from_config(config, ckpt, verbose=False, device='cuda', half_prec
     return model
 
 if load_on_run_all and ckpt_valid:
+    if half_precision:
+        torch.set_default_tensor_type(torch.HalfTensor)
     local_config = OmegaConf.load(f"{ckpt_config_path}")
     model = load_model_from_config(local_config, f"{ckpt_path}", half_precision=half_precision)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
