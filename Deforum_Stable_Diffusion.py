@@ -580,8 +580,7 @@ ckpt_valid = True
 if os.path.exists(ckpt_path):
     print(f"{ckpt_path} exists")
 else:
-    print(f"Please download model checkpoint and place in {os.path.join(models_path, model_checkpoint)}")
-    ckpt_valid = False
+    raise Exception(f"Please download model checkpoint and place in {os.path.join(models_path, model_checkpoint)}")
 
 if check_sha256 and model_checkpoint != "custom" and ckpt_valid:
     import hashlib

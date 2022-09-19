@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import torch
 import torchvision.transforms as T
+import torchvision.transforms.functional as TF
 
 from einops import rearrange, repeat
 from PIL import Image
@@ -38,7 +39,7 @@ class DepthModel():
             wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", models_path)
 
         self.midas_model = DPTDepthModel(
-            path=f"{models_path}/dpt_large-midas-2f21e586.pt",
+            path=os.path.join(models_path, "dpt_large-midas-2f21e586.pt"),
             backbone="vitl16_384",
             non_negative=True,
         )
@@ -98,6 +99,7 @@ class DepthModel():
                         torch.Size([h, w]),
                         interpolation=TF.InterpolationMode.BICUBIC
                     )
+                    adabins_depth = adabins_depth.cpu().numpy()
                 adabins_depth = adabins_depth.squeeze()
             except:
                 print(f"  exception encountered, falling back to pure MiDaS")
@@ -148,7 +150,6 @@ class DepthModel():
             depth = np.expand_dims(depth, axis=0)
         self.depth_min = min(self.depth_min, depth.min())
         self.depth_max = max(self.depth_max, depth.max())
-        print(f"  depth min:{depth.min()} max:{depth.max()}")
         denom = max(1e-8, self.depth_max - self.depth_min)
         temp = rearrange((depth - self.depth_min) / denom * 255, 'c h w -> h w c')
         temp = repeat(temp, 'h w 1 -> h w c', c=3)
